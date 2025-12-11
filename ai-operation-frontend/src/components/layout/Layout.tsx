@@ -1,39 +1,104 @@
-import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout as AntLayout, Menu, Avatar, Badge, Dropdown } from 'antd'
+import { Layout as AntLayout, Menu, Avatar, Badge, Dropdown, Button, Space } from 'antd'
 import {
   HomeOutlined,
   ThunderboltOutlined,
   ToolOutlined,
-  BarChartOutlined,
   UserOutlined,
-  TeamOutlined,
   CrownOutlined,
-  RocketOutlined,
+  SettingOutlined,
+  LogoutOutlined,
+  DashboardOutlined,
+  LoginOutlined,
+  EditOutlined,
+  RobotOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
+import { useAuth } from '../../contexts/AuthContext'
 
 const { Header, Content } = AntLayout
 
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [credits] = useState(1000)
+  const { isAuthenticated, isAdmin, profile, signOut } = useAuth()
 
-  const menuItems: MenuProps['items'] = [
+  // 公共菜单项
+  const publicMenuItems: MenuProps['items'] = [
     { key: '/', label: '首页', icon: <HomeOutlined /> },
-    { key: '/workflows', label: '工作流', icon: <ThunderboltOutlined /> },
-    { key: '/tools', label: '工具箱', icon: <ToolOutlined /> },
-    { key: '/create', label: '一键创作', icon: <RocketOutlined /> },
-    { key: '/analytics', label: '数据分析', icon: <BarChartOutlined /> },
-    { key: '/accounts', label: '账号管理', icon: <UserOutlined /> },
-    { key: '/team', label: '团队管理', icon: <TeamOutlined /> },
+    { key: '/agents', label: '智能体商店', icon: <RobotOutlined /> },
+    { key: '/workflows', label: '工作流商店', icon: <ThunderboltOutlined /> },
+    { key: '/pricing', label: '套餐价格', icon: <CrownOutlined /> },
   ]
 
-  const userMenuItems: MenuProps['items'] = [
-    { key: 'profile', label: '个人资料' },
-    { key: 'settings', label: '设置' },
-    { key: 'logout', label: '退出登录' },
+  // 登录用户菜单项
+  const authMenuItems: MenuProps['items'] = [
+    { key: '/', label: '首页', icon: <HomeOutlined /> },
+    { key: '/agents', label: '智能体商店', icon: <RobotOutlined /> },
+    { key: '/workflows', label: '工作流商店', icon: <ThunderboltOutlined /> },
+    { key: '/tools', label: '工具箱', icon: <ToolOutlined /> },
+    { key: '/creator', label: '创作者中心', icon: <EditOutlined /> },
+  ]
+
+  // 管理员额外菜单
+  const adminMenuItems: MenuProps['items'] = isAdmin ? [
+    { key: '/admin', label: '管理后台', icon: <DashboardOutlined /> },
+  ] : []
+
+  const menuItems = isAuthenticated 
+    ? [...authMenuItems, ...adminMenuItems]
+    : publicMenuItems
+
+  // 退出登录处理 - 最简单有效的方式
+  const handleLogout = () => {
+    // 1. 同步清除所有 Supabase 相关的 localStorage（立即执行，不等待）
+    const keys = Object.keys(localStorage)
+    keys.forEach(key => {
+      if (key.startsWith('sb-') || key.includes('supabase')) {
+        localStorage.removeItem(key)
+      }
+    })
+    
+    // 2. 通知服务端（不等待结果）
+    signOut().catch(() => {})
+    
+    // 3. 立即跳转（使用 replace 防止后退）
+    window.location.replace('/')
+  }
+
+  // 用户下拉菜单项
+  const dropdownItems = [
+    {
+      key: 'profile',
+      label: '个人资料',
+      icon: <UserOutlined />,
+      onClick: () => {
+        console.log('Profile clicked')
+        navigate('/profile')
+      },
+    },
+    {
+      key: 'settings',
+      label: '设置',
+      icon: <SettingOutlined />,
+      onClick: () => {
+        console.log('Settings clicked')
+        navigate('/settings')
+      },
+    },
+    {
+      type: 'divider' as const,
+    },
+    {
+      key: 'logout',
+      label: '退出登录',
+      icon: <LogoutOutlined />,
+      danger: true,
+      onClick: () => {
+        console.log('Logout clicked')
+        handleLogout()
+      },
+    },
   ]
 
   return (
@@ -56,7 +121,10 @@ export default function Layout() {
           width: '100%',
           maxWidth: 1400
         }}>
-          <div style={{ fontSize: 20, fontWeight: 'bold', color: '#1890ff' }}>
+          <div 
+            style={{ fontSize: 20, fontWeight: 'bold', color: '#1890ff', cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
             AI运营系统
           </div>
           
@@ -69,30 +137,65 @@ export default function Layout() {
           />
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div 
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 8,
-                padding: '4px 12px',
-                background: '#f0f2f5',
-                borderRadius: 16,
-                cursor: 'pointer'
-              }}
-              onClick={() => navigate('/pricing')}
-            >
-              <CrownOutlined style={{ color: '#faad14' }} />
-              <span style={{ fontWeight: 500 }}>{credits} 积分</span>
-            </div>
-            
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Badge dot>
-                <Avatar 
-                  style={{ backgroundColor: '#1890ff', cursor: 'pointer' }} 
-                  icon={<UserOutlined />} 
-                />
-              </Badge>
-            </Dropdown>
+            {isAuthenticated ? (
+              <>
+                {/* 积分显示 */}
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 8,
+                    padding: '4px 12px',
+                    background: '#f0f2f5',
+                    borderRadius: 16,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => navigate('/pricing')}
+                >
+                  <CrownOutlined style={{ color: '#faad14' }} />
+                  <span style={{ fontWeight: 500 }}>{profile?.credits ?? 0} 积分</span>
+                </div>
+                
+                {/* 用户头像下拉菜单 */}
+                <Dropdown 
+                  menu={{ items: dropdownItems }} 
+                  placement="bottomRight"
+                  trigger={['click']}
+                >
+                  <div 
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    onClick={(e) => {
+                      console.log('Avatar clicked')
+                      e.stopPropagation()
+                    }}
+                  >
+                    <Badge dot={false}>
+                      <Avatar 
+                        style={{ backgroundColor: '#1890ff' }} 
+                        icon={<UserOutlined />}
+                        src={profile?.avatar}
+                      />
+                    </Badge>
+                  </div>
+                </Dropdown>
+              </>
+            ) : (
+              <Space>
+                <Button 
+                  type="text" 
+                  icon={<LoginOutlined />}
+                  onClick={() => navigate('/login')}
+                >
+                  登录
+                </Button>
+                <Button 
+                  type="primary"
+                  onClick={() => navigate('/register')}
+                >
+                  免费注册
+                </Button>
+              </Space>
+            )}
           </div>
         </div>
       </Header>

@@ -28,7 +28,7 @@ npm install --registry=https://registry.npmmirror.com
 ### 3. 启动开发服务器
 
 ```bash
-npm run dev
+n
 ```
 
 服务器将在 http://localhost:3000 启动，浏览器会自动打开。
