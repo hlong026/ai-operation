@@ -6,11 +6,9 @@ import {
   ToolOutlined,
   UserOutlined,
   CrownOutlined,
-  SettingOutlined,
   LogoutOutlined,
   DashboardOutlined,
   LoginOutlined,
-  EditOutlined,
   RobotOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
@@ -37,7 +35,6 @@ export default function Layout() {
     { key: '/agents', label: '智能体商店', icon: <RobotOutlined /> },
     { key: '/workflows', label: '工作流商店', icon: <ThunderboltOutlined /> },
     { key: '/tools', label: '工具箱', icon: <ToolOutlined /> },
-    { key: '/creator', label: '创作者中心', icon: <EditOutlined /> },
   ]
 
   // 管理员额外菜单
@@ -69,22 +66,10 @@ export default function Layout() {
   // 用户下拉菜单项
   const dropdownItems = [
     {
-      key: 'profile',
-      label: '个人资料',
+      key: 'user-center',
+      label: '个人中心',
       icon: <UserOutlined />,
-      onClick: () => {
-        console.log('Profile clicked')
-        navigate('/profile')
-      },
-    },
-    {
-      key: 'settings',
-      label: '设置',
-      icon: <SettingOutlined />,
-      onClick: () => {
-        console.log('Settings clicked')
-        navigate('/settings')
-      },
+      onClick: () => navigate('/user'),
     },
     {
       type: 'divider' as const,
@@ -94,10 +79,7 @@ export default function Layout() {
       label: '退出登录',
       icon: <LogoutOutlined />,
       danger: true,
-      onClick: () => {
-        console.log('Logout clicked')
-        handleLogout()
-      },
+      onClick: handleLogout,
     },
   ]
 
@@ -162,13 +144,7 @@ export default function Layout() {
                   placement="bottomRight"
                   trigger={['click']}
                 >
-                  <div 
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                    onClick={(e) => {
-                      console.log('Avatar clicked')
-                      e.stopPropagation()
-                    }}
-                  >
+                  <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <Badge dot={false}>
                       <Avatar 
                         style={{ backgroundColor: '#1890ff' }} 

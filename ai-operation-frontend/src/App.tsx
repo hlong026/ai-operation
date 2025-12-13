@@ -14,6 +14,7 @@ import ToolDetail from './pages/ToolDetail'
 import Agents from './pages/Agents'
 import AgentDetail from './pages/AgentDetail'
 import CreatorCenter from './pages/CreatorCenter'
+import UserCenter from './pages/UserCenter'
 import Pricing from './pages/Pricing'
 import Admin from './pages/Admin'
 import Login from './pages/Login'
@@ -70,6 +71,11 @@ function App() {
               <Route path="creator" element={
                 <ProtectedRoute>
                   <CreatorCenter />
+                </ProtectedRoute>
+              } />
+              <Route path="user" element={
+                <ProtectedRoute>
+                  <UserCenter />
                 </ProtectedRoute>
               } />
               
